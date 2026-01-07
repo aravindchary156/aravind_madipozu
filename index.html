@@ -187,6 +187,7 @@
             flex-wrap: wrap;
             gap: 20px;
             margin-top: 30px;
+            align-items: center;
         }
 
         .contact-item {
@@ -198,6 +199,31 @@
         .contact-item i {
             color: var(--primary-color);
             font-size: 1.2rem;
+        }
+
+        .resume-download {
+            margin-top: 20px;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .download-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .download-btn i {
+            font-size: 1.1rem;
         }
 
         /* Photo Upload Modal */
@@ -666,7 +692,7 @@
 
             .contact-info {
                 flex-direction: column;
-                align-items: center;
+                align-items: flex-start;
             }
 
             .projects-container {
@@ -723,11 +749,18 @@
                             <span>linkedin.com/in/aravind-madipozu/</span>
                         </div>
                     </div>
+                    
+                    <!-- Resume Download Button -->
+                    <div class="resume-download">
+                        <a href="https://github.com/aravindchary156/aravind_madipozu/raw/main/aravind.devops%20engineer%20(1)%20(1)%20(1).docx" class="download-btn" download>
+                            <i class="fas fa-download"></i> Download Resume
+                        </a>
+                    </div>
                 </div>
                 <div class="hero-image">
                     <div class="profile-img-container">
-                        <!-- Your photo from data folder -->
-                        <img id="profilePhoto" class="profile-img" src="aravind.jpeg" alt="Aravind Madipozu" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22 viewBox=%220 0 300 300%22%3E%3Crect width=%22300%22 height=%22300%22 fill=%22%232563eb%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2280%22 fill=%22white%22%3EA%3C/text%3E%3C/svg%3E'">
+                        <!-- Your GitHub profile photo -->
+                        <img id="profilePhoto" class="profile-img" src="https://raw.githubusercontent.com/aravindchary156/aravind_madipozu/main/aravind.jpeg" alt="Aravind Madipozu" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22 viewBox=%220 0 300 300%22%3E%3Crect width=%22300%22 height=%22300%22 fill=%22%232563eb%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2280%22 fill=%22white%22%3EA%3C/text%3E%3C/svg%3E'">
                         
                         <!-- Upload button overlay -->
                         <div class="upload-overlay" id="uploadTrigger">
@@ -968,7 +1001,7 @@
             </div>
             <div class="copyright">
                 <p>&copy; 2023 Aravind Madipozu. All rights reserved.</p>
-                <p style="margin-top: 5px; font-size: 0.8rem;">Your photo is loaded from data/aravind.jpeg</p>
+                <p style="margin-top: 5px; font-size: 0.8rem;">Profile photo loaded from your GitHub repository</p>
             </div>
         </div>
     </footer>
@@ -1018,18 +1051,14 @@
         const resetBtn = document.getElementById('resetBtn');
         const profilePhoto = document.getElementById('profilePhoto');
         
-        const DEFAULT_PHOTO = 'data/aravind.jpeg';
+        const DEFAULT_PHOTO = 'https://raw.githubusercontent.com/aravindchary156/aravind_madipozu/main/aravind.jpeg';
         let selectedFile = null;
 
         // Load saved photo from localStorage if available
         window.addEventListener('DOMContentLoaded', () => {
             const savedPhoto = localStorage.getItem('portfolioProfilePhoto');
-            if (savedPhoto) {
-                // Check if saved photo is the default one or a custom uploaded one
-                if (savedPhoto !== DEFAULT_PHOTO && !savedPhoto.startsWith('data:image')) {
-                    // If it's a custom uploaded photo stored as base64
-                    profilePhoto.src = savedPhoto;
-                }
+            if (savedPhoto && savedPhoto !== DEFAULT_PHOTO) {
+                profilePhoto.src = savedPhoto;
             }
         });
 
@@ -1052,6 +1081,15 @@
             }
         });
 
+        // Reset to default photo
+        resetBtn.addEventListener('click', () => {
+            profilePhoto.src = DEFAULT_PHOTO;
+            localStorage.removeItem('portfolioProfilePhoto');
+            photoUploadModal.style.display = 'none';
+            resetUploadForm();
+            alert('Photo reset to default from your GitHub repository.');
+        });
+
         // Trigger file input when drop area is clicked
         dropArea.addEventListener('click', () => {
             photoInput.click();
@@ -1065,59 +1103,4 @@
         });
 
         // Drag and drop functionality
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, unhighlight, false);
-        });
-
-        function highlight() {
-            dropArea.classList.add('dragover');
-        }
-
-        function unhighlight() {
-            dropArea.classList.remove('dragover');
-        }
-
-        // Handle dropped files
-        dropArea.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            const file = dt.files[0];
-            handleFileSelection(file);
-        });
-
-        // Handle file selection and preview
-        function handleFileSelection(file) {
-            // Check if file is an image
-            if (!file.type.match('image.*')) {
-                alert('Please select an image file (JPG, PNG, etc.)');
-                return;
-            }
-
-            // Check file size (max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('File size should be less than 5MB');
-                return;
-            }
-
-            selectedFile = file;
-            
-            // Create preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                photoPreview.src = e.target.result;
-                photoPreview.style.display = 'block';
-                uploadBtn.disabled = false;
-                
-               
+        ['dragenter', '
